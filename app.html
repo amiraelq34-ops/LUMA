@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Today · LUMA</title>
+  <meta name="theme-color" content="#FBF8F3">
+  <link rel="icon" href="assets/logo-icon.png">
+  <link rel="apple-touch-icon" href="assets/logo-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="luma.css">
+  <style>
+    /* Light through the day: the whole screen shifts with the clock */
+    body { min-height: 100vh; transition: background var(--slow) var(--ease); }
+    body[data-time="morning"] { background: linear-gradient(180deg, var(--cream) 10%, var(--peach) 100%) fixed; }
+    body[data-time="day"]     { background: linear-gradient(180deg, var(--cream) 10%, var(--blush) 100%) fixed; }
+    body[data-time="evening"] { background: linear-gradient(180deg, var(--blush) 0%, var(--lavender) 100%) fixed; }
+    body[data-time="night"] {
+      --text: #E4DCE8; --heading: var(--cream);
+      --surface: rgba(255, 255, 255, 0.07); --line: rgba(251, 248, 243, 0.18);
+      background: linear-gradient(180deg, var(--plum) 0%, var(--midnight) 70%) fixed;
+    }
+    body[data-time="night"] .btn { background: var(--cream); color: var(--midnight); border-color: var(--cream); }
+    body[data-time="night"] .btn-ghost { background: transparent; color: var(--cream); border-color: var(--line); }
+
+    main { max-width: 520px; margin: 0 auto; padding: 0 16px 64px; }
+
+    header.top { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 8px; }
+    header.top .mark-wrap { display: block; width: 40px; height: 40px; border-radius: 50%; padding: 5px; }
+    body[data-time="night"] .mark-wrap { background: var(--cream); }
+    header.top .date { font-size: 14px; }
+
+    .greeting { padding: 28px 0 8px; }
+    .greeting h1 { font-size: clamp(38px, 11vw, 52px); }
+    .greeting p { margin-top: 10px; font-size: 17px; max-width: 32ch; }
+
+    /* Moon: the signature element */
+    .moon-block { display: flex; align-items: center; gap: 20px; padding: 24px 0 32px; }
+    .moon-block svg { flex: none; width: 112px; height: 112px; }
+    body[data-time="night"] .moon-block { flex-direction: column; text-align: center; padding: 16px 0 40px; }
+    body[data-time="night"] .moon-block svg { width: 180px; height: 180px; }
+    .moon-count strong {
+      display: block; font-family: var(--font-display); font-weight: 300;
+      font-size: 44px; line-height: 1; color: var(--heading);
+    }
+    .moon-count span { font-size: 15px; }
+    .moon-count small { display: block; margin-top: 6px; font-size: 13px; opacity: .85; }
+
+    /* Check-in */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .card h2 { font-size: 24px; }
+    .card .sub { margin-top: 4px; font-size: 15px; }
+
+    .moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 18px; }
+    .mood {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      min-height: 44px; padding: 6px 0; border: 0; background: none; cursor: pointer;
+      font: 400 13px var(--font-body); color: var(--text);
+    }
+    .mood .dot {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--c);
+      transition: transform 300ms var(--ease), box-shadow 300ms var(--ease);
+    }
+    .mood[aria-pressed="true"] { color: var(--heading); font-weight: 500; }
+    .mood[aria-pressed="true"] .dot { transform: scale(1.12); box-shadow: 0 0 0 3px var(--bg-ring, var(--cream)), 0 0 0 4.5px var(--heading); }
+    body[data-time="night"] .mood { --bg-ring: var(--midnight); }
+
+    .checkin-foot { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+    .saved { font-size: 14px; }
+
+    /* This moon: one dot per day of the cycle */
+    section.cycle { margin-top: 36px; }
+    section.cycle h2 { font-size: 22px; }
+    section.cycle .sub { font-size: 14px; margin-top: 2px; }
+    .days { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin-top: 16px; }
+    .day-dot {
+      aspect-ratio: 1; border-radius: 50%;
+      border: 1px dashed var(--line);
+      padding: 0; background: none;
+    }
+    .day-dot.filled { border: 0; background: var(--c); cursor: pointer; }
+    .day-dot.today { outline: 1px solid var(--heading); outline-offset: 2px; }
+    .day-dot.future { opacity: .45; }
+
+    .note-list { margin-top: 20px; display: grid; gap: 10px; }
+    .note-list article { font-size: 15px; padding: 14px 16px; }
+    .note-list time { display: block; font-size: 13px; opacity: .8; margin-bottom: 2px; }
+
+    /* Bottom sheet for "add more" */
+    dialog.sheet {
+      inset: auto 0 0 0; margin: 0 auto; width: 100%; max-width: 520px; max-height: 88dvh;
+      border: 0; padding: 0; border-radius: 24px 24px 0 0;
+      background: var(--cream); color: var(--plum);
+    }
+    dialog.sheet::backdrop { background: rgba(39, 35, 51, .38); }
+    dialog.sheet[open] { animation: up var(--slow) var(--ease); }
+    @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+    .sheet form { padding: 12px 20px 28px; }
+    .sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 16px; }
+    .sheet h2 { font-size: 26px; color: var(--midnight); }
+    .sheet fieldset { border: 0; padding: 0; margin: 24px 0 0; }
+    .sheet legend { font-weight: 500; color: var(--midnight); margin-bottom: 10px; padding: 0; }
+    .scale { display: flex; gap: 8px; }
+    .chip input { position: absolute; opacity: 0; pointer-events: none; }
+    .chip span {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 44px; min-height: 44px; padding: 0 16px; border-radius: 999px;
+      border: 1px solid rgba(102, 86, 111, .22); cursor: pointer; font-size: 15px;
+      transition: background 200ms, border-color 200ms;
+    }
+    .chip input:checked + span { background: var(--blush); border-color: var(--plum); color: var(--midnight); }
+    .chip input:focus-visible + span { outline: 2px solid var(--midnight); outline-offset: 2px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sleep-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .sleep-row input[type="number"] {
+      width: 84px; min-height: 44px; padding: 0 12px; border-radius: 12px;
+      border: 1px solid rgba(102, 86, 111, .22); background: #fff; font: 16px var(--font-body); color: var(--midnight);
+    }
+    .sheet textarea {
+      width: 100%; min-height: 96px; padding: 12px 14px; border-radius: 12px; resize: vertical;
+      border: 1px solid rgba(102, 86, 111, .22); background: #fff; font: 16px/1.5 var(--font-body); color: var(--midnight);
+    }
+    .sheet .actions { display: flex; gap: 12px; margin-top: 28px; }
+    .sheet .actions .btn { flex: 1; }
+    .sheet .btn { background: var(--midnight); color: var(--cream); border-color: var(--midnight); }
+    .sheet .btn-ghost { background: transparent; color: var(--midnight); border-color: rgba(102, 86, 111, .22); }
+  </style>
+</head>
+<body data-time="morning">
+  <main>
+    <header class="top">
+      <a class="mark-wrap" href="index.html" aria-label="LUMA home"><span class="mark" role="img" aria-label="LUMA"></span></a>
+      <span class="date" id="date"></span>
+    </header>
+
+    <section class="greeting">
+      <h1 id="greeting">Good morning</h1>
+      <p id="greeting-sub"></p>
+    </section>
+
+    <section class="moon-block" aria-live="polite">
+      <svg id="moon" viewBox="0 0 120 120" role="img" aria-label="Tonight's moon"></svg>
+      <div class="moon-count">
+        <strong id="count">0</strong>
+        <span id="count-label">days you showed up this moon</span>
+        <small id="last-moon"></small>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="checkin-title">
+      <h2 id="checkin-title">How are you, really?</h2>
+      <p class="sub" id="checkin-sub">One tap is enough.</p>
+      <div class="moods" id="moods" role="group" aria-labelledby="checkin-title"></div>
+      <div class="checkin-foot">
+        <span class="saved" id="saved"></span>
+        <button class="link-btn" id="add-more" type="button" hidden>Add more</button>
+      </div>
+    </section>
+
+    <section class="cycle" aria-labelledby="cycle-title">
+      <h2 id="cycle-title">This moon</h2>
+      <p class="sub" id="cycle-sub"></p>
+      <div class="days" id="days"></div>
+      <div class="note-list" id="notes"></div>
+    </section>
+  </main>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <form id="more-form" method="dialog">
+      <div class="grab" aria-hidden="true"></div>
+      <h2 id="sheet-title">A little more about today</h2>
+
+      <fieldset>
+        <legend>Energy</legend>
+        <div class="scale">
+          <label class="chip"><input type="radio" name="energy" value="1"><span>1</span></label>
+          <label class="chip"><input type="radio" name="energy" value="2"><span>2</span></label>
+          <label class="chip"><input type="radio" name="energy" value="3"><span>3</span></label>
+          <label class="chip"><input type="radio" name="energy" value="4"><span>4</span></label>
+          <label class="chip"><input type="radio" name="energy" value="5"><span>5</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sleep last night</legend>
+        <div class="sleep-row">
+          <input type="number" name="sleepHours" id="sleep-hours" min="0" max="16" step="0.5" inputmode="decimal" aria-label="Hours of sleep">
+          <label for="sleep-hours">hours</label>
+        </div>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="sleepQuality" value="restless"><span>Restless</span></label>
+          <label class="chip"><input type="radio" name="sleepQuality" value="okay"><span>Okay</span></label>
+          <label class="chip"><input type="radio" name="sleepQuality" value="rested"><span>Rested</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>What I did for myself</legend>
+        <div class="chips" id="tags"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend><label for="note">A note to yourself</label></legend>
+        <textarea id="note" name="note" maxlength="1000" placeholder="Only you can see this."></textarea>
+      </fieldset>
+
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" id="sheet-cancel">Cancel</button>
+        <button class="btn" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

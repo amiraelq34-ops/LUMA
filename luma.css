@@ -1,0 +1,135 @@
+/* LUMA design system — every screen uses these values. */
+
+:root {
+  --cream: #FBF8F3;
+  --blush: #F5DCE2;
+  --peach: #F8E2D1;
+  --lavender: #E9E1F1;
+  --plum: #66566F;
+  --midnight: #272333;
+
+  /* Mood colours, softened to the palette */
+  --mood-bright: #F3C9A0;
+  --mood-steady: #EDB9C5;
+  --mood-tender: #CDBCE3;
+  --mood-heavy: #A9B7CF;
+  --mood-foggy: #CFC6BE;
+
+  --bg: var(--cream);
+  --text: var(--plum);
+  --heading: var(--midnight);
+  --surface: rgba(255, 255, 255, 0.62);
+  --line: rgba(102, 86, 111, 0.16);
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Jost", "Helvetica Neue", Arial, sans-serif;
+
+  --radius: 16px;
+  --arch: 999px 999px 20px 20px;
+  --ease: cubic-bezier(.3, .7, .2, 1);
+  --slow: 400ms;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--heading);
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p { margin: 0; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--midnight);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- Logo (cropped from the brand PNG) ---------- */
+.wordmark, .mark {
+  display: block;
+  background-image: url("assets/logo-icon-flat.png");
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+}
+.wordmark {
+  aspect-ratio: 585 / 230;
+  background-size: 204.4% auto;
+  background-position: 12.3% 45.7%;
+}
+.mark {
+  aspect-ratio: 340 / 365;
+  background-size: 351.8% auto;
+  background-position: 90% 50.8%;
+}
+.tagline {
+  font-size: 12px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: 999px;
+  border: 1px solid var(--midnight);
+  background: var(--midnight);
+  color: var(--cream);
+  font: 500 15px/1 var(--font-body);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 200ms var(--ease), background var(--slow) var(--ease);
+}
+.btn:active { transform: scale(0.98); }
+.btn-ghost {
+  background: transparent;
+  color: var(--heading);
+  border-color: var(--line);
+}
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  min-height: 44px;
+  font: 500 15px var(--font-body);
+  color: var(--heading);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

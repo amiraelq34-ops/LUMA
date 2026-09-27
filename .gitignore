@@ -1,0 +1,12 @@
+# Only the website is published. Everything else in this folder stays private.
+# Block everything...
+/*
+# ...then allow just the website files:
+!/.gitignore
+!/index.html
+!/app.html
+!/app.js
+!/luma.css
+!/checkin.html
+!/README.md
+!/assets/
